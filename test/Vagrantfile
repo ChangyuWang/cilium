@@ -34,7 +34,6 @@ Vagrant.configure("2") do |config|
             vb.cpus = $CPU
             vb.memory= $MEMORY
             vb.linked_clone = true
-
             # Prevent VirtualBox from interfering with host audio stack
             vb.customize ["modifyvm", :id, "--audio", "none"]
         end
@@ -45,7 +44,7 @@ Vagrant.configure("2") do |config|
         server.vm.hostname = "runtime"
 
         # This network is only used by NFS
-        server.vm.network "private_network", type: "dhcp"
+        server.vm.network "private_network", type: "dhcp", nic_type: "virtio"
         server.vm.synced_folder "../", "/home/vagrant/go/src/github.com/cilium/cilium",
             nfs: $NFS
 
@@ -66,7 +65,6 @@ Vagrant.configure("2") do |config|
                 vb.cpus = $CPU
                 vb.memory= $MEMORY
                 vb.linked_clone = true
-
                 # Prevent VirtualBox from interfering with host audio stack
                 vb.customize ["modifyvm", :id, "--audio", "none"]
             end
@@ -77,7 +75,8 @@ Vagrant.configure("2") do |config|
             server.vm.boot_timeout = 600
             server.vm.network "private_network",
                 ip: "192.168.36.1#{i}",
-                virtualbox__intnet: "cilium-k8s#{$BUILD_NUMBER}-#{$JOB_NAME}-#{$K8S_VERSION}"
+                virtualbox__intnet: "cilium-k8s#{$BUILD_NUMBER}-#{$JOB_NAME}-#{$K8S_VERSION}",
+                nic_type: "virtio"
 
             # @TODO: Clean this one when https://github.com/hashicorp/vagrant/issues/9822 is fixed.
             server.vm.provision "ipv6-config",
@@ -86,7 +85,7 @@ Vagrant.configure("2") do |config|
                 inline: "ip -6 a a fd04::1#{i}/96 dev enp0s8 || true"
 
             # This network is only used by NFS
-            server.vm.network "private_network", type: "dhcp"
+            server.vm.network "private_network", type: "dhcp", nic_type: "virtio"
             server.vm.synced_folder "../", "/home/vagrant/go/src/github.com/cilium/cilium",
                 nfs: $NFS
             # Provision section
